@@ -15,7 +15,8 @@ const generateMockData = (numTrials: number, dataset: string, modelType: string)
 
   for (let i = 0; i < numTrials; i++) {
     // Simulate score improvement or fluctuation
-    const score = 0.65 + Math.random() * 0.30 * (1 + i / (numTrials * 2)); // Slight upward trend
+    const rawScore = 0.65 + Math.random() * 0.30 * (1 + i / (numTrials * 2)); // Slight upward trend
+    const score = parseFloat(rawScore.toFixed(4));
     const params: Record<string, any> = {
       learning_rate: parseFloat((Math.random() * 0.1 + 0.001).toFixed(4)),
       n_estimators: Math.floor(Math.random() * 150) + 50,
@@ -26,16 +27,13 @@ const generateMockData = (numTrials: number, dataset: string, modelType: string)
       params.criterion = Math.random() > 0.5 ? 'gini' : 'entropy';
     }
     
-    trialsData.push({ trial: i + 1, score: parseFloat(score.toFixed(4)) });
+    trialsData.push({ trial: i + 1, score });
 
     if (score > bestScore) {
-      bestScore = parseFloat(score.toFixed(4));
+      bestScore = score;
       bestParams = params;
     }
   }
-  // Ensure bestScore is among the trial scores if possible for consistency, or the actual max
-  const maxTrialScore = Math.max(...trialsData.map(t => t.score), 0);
-  if (bestScore < maxTrialScore) bestScore = maxTrialScore;
   if (Object.keys(bestParams).length === 0 && trialsData.length > 0) { // if somehow bestParams wasn't set
     bestParams = { simulated_param: "default_value" }; // fallback
   }
